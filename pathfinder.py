@@ -76,17 +76,17 @@ def cost(Node1, Node2):
 def ucs(problem):
     node_queue = PriorityQueue()
     start_node = Node(startx, starty)
+    counter =0
     start_node.height = int(problem[startx][starty])
-    node_queue.put((start_node.path_cost, start_node))
+    node_queue.put((start_node.path_cost, counter, start_node))
+    counter += 1
     moves = [[-1,0], [1,0], [0,-1],[0,1]]
-    visited = [[False] * Rows for i in range (Columns)]
-    visited[start_node.x][start_node.y] = True
     visited_cost = {}
     found_end = False
     while not node_queue.empty():
-        currentcost, currentnode = node_queue.get()
+        currentcost, _, currentnode = node_queue.get()
         x, y = currentnode.x, currentnode.y
-        if (x, y) not in visited or currentcost < visited[(x, y)]:
+        if (x, y) not in visited_cost or currentcost < visited_cost[(x, y)]:
             visited_cost[(x, y)] = currentcost
         if x == endx and y == endy:
             found_end=True
@@ -94,13 +94,14 @@ def ucs(problem):
         for dx, dy in moves:
             newx = x + dx
             newy = y + dy
-            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and not visited[newx][newy] and problem[newx][newy] != 'X':
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and (newx, newy) not in visited_cost and problem[newx][newy] != 'X':
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 new_node.height = int(problem[newx][newy])
                 new_node.path_cost = currentcost + cost(currentnode, new_node)
-                node_queue.put((new_node.path_cost, new_node))
-                visited[newx][newy]= True
+                node_queue.put((new_node.path_cost, counter, new_node))
+                counter+=1
+            
                 
         
     if found_end:
