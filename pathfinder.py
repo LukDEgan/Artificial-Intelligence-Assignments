@@ -1,5 +1,6 @@
 import sys
 from collections import deque
+from queue import PriorityQueue
 with open(sys.argv[1], "r") as file:
     firstline = file.readline().split()
     Rows = int(firstline[0])
@@ -21,13 +22,14 @@ class Node:
          self.parent = None
          self.height = 0
          self.rock = False
-         
+         self.path_cost=0
+    def __lt__(self, other):
+        return self.path_cost < other.path_cost
+
 def bfs(problem):
     node_queue = deque()
     start_node = Node(startx, starty)
     node_queue.append(start_node)
-  
-    move_count = 0
     moves = [[-1,0], [1,0], [0,-1],[0,1]]
     visited = [[False] * Rows for i in range (Columns)]
     visited[start_node.x][start_node.y] = True
@@ -54,7 +56,53 @@ def bfs(problem):
             atdepth_nodes = deeper_nodes
             
             deeper_nodes =0
-            move_count +=1
+        
+    if found_end:
+        problem[currentnode.x][currentnode.y] = '*'
+        currentnode = currentnode.parent
+        while currentnode:
+            problem[currentnode.x][currentnode.y] = '*'
+            currentnode = currentnode.parent
+        return problem
+    return -1
+
+def cost(Node1, Node2):
+    if Node1.height - Node2.height > 0:
+        return 1 + Node1.height - Node2.height
+    else:
+        return 1
+
+
+def ucs(problem):
+    node_queue = PriorityQueue()
+    start_node = Node(startx, starty)
+    start_node.height = int(problem[startx][starty])
+    node_queue.put((start_node.path_cost, start_node))
+    moves = [[-1,0], [1,0], [0,-1],[0,1]]
+    visited = [[False] * Rows for i in range (Columns)]
+    visited[start_node.x][start_node.y] = True
+    visited_cost = {}
+    found_end = False
+    while not node_queue.empty():
+        currentcost, currentnode = node_queue.get()
+        x, y = currentnode.x, currentnode.y
+        if (x, y) not in visited or currentcost < visited[(x, y)]:
+            visited_cost[(x, y)] = currentcost
+        if x == endx and y == endy:
+            found_end=True
+            break
+        for dx, dy in moves:
+            newx = x + dx
+            newy = y + dy
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and not visited[newx][newy] and problem[newx][newy] != 'X':
+                new_node = Node(newx, newy)
+                new_node.parent = currentnode
+                new_node.height = int(problem[newx][newy])
+                new_node.path_cost = currentcost + cost(currentnode, new_node)
+                node_queue.put((new_node.path_cost, new_node))
+                visited[newx][newy]= True
+                
+        
     if found_end:
         problem[currentnode.x][currentnode.y] = '*'
         currentnode = currentnode.parent
@@ -65,12 +113,17 @@ def bfs(problem):
     return -1
 
 
+
+
 algorithm = sys.argv[2]
 if(algorithm == "bfs"):
     bfs_solve = bfs(map)
     for row in bfs_solve:
         print(' '.join(row))
-
+elif algorithm == "ucs":
+    ucs_solve = ucs(map)
+    for row in ucs_solve:
+        print(" ".join(row))
 
 
     
