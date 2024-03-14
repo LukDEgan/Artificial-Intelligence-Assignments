@@ -26,11 +26,13 @@ class Node:
     def __lt__(self, other):
         return self.path_cost < other.path_cost
 
+
+moves = [[-1,0], [1,0], [0,-1],[0,1]]
+
 def bfs(problem):
     node_queue = deque()
     start_node = Node(startx, starty)
     node_queue.append(start_node)
-    moves = [[-1,0], [1,0], [0,-1],[0,1]]
     visited = [[False] * Rows for i in range (Columns)]
     visited[start_node.x][start_node.y] = True
     deeper_nodes = 0
@@ -80,7 +82,6 @@ def ucs(problem):
     start_node.height = int(problem[startx][starty])
     node_queue.put((start_node.path_cost, counter, start_node))
     counter += 1
-    moves = [[-1,0], [1,0], [0,-1],[0,1]]
     visited_cost = {}
     found_end = False
     while not node_queue.empty():
