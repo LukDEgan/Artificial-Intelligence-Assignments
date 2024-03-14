@@ -25,6 +25,8 @@ class Node:
          self.path_cost=0
     def __lt__(self, other):
         return self.path_cost < other.path_cost
+    def pos(self):
+        return (self.x, self.y)
 
 
 moves = [[-1,0], [1,0], [0,-1],[0,1]]
@@ -114,7 +116,54 @@ def ucs(problem):
         return problem
     return -1
 
+def manhattan(current_pos, end_pos):
+    return ((abs(end_pos[0]-current_pos[0]))+ (abs(end_pos[1]-current_pos[1])))
 
+
+def euclidean(current_pos, end_pos):
+    return ( ((abs(end_pos[0]-current_pos[0]))**2+ (abs(end_pos[1]-current_pos[1]))**2)**0.5)
+
+def astar(problem):
+    node_queue = PriorityQueue()
+    start_node = Node(startx, starty)
+    counter =0
+    start_node.height = int(problem[startx][starty])
+    node_queue.put((start_node.path_cost, counter, start_node))
+    counter += 1
+    visited_cost = {}
+    found_end = False
+    while not node_queue.empty():
+        currentcost, _, currentnode = node_queue.get()
+        x, y = currentnode.x, currentnode.y
+        if (x, y) not in visited_cost or currentcost < visited_cost[(x, y)]:
+            visited_cost[(x, y)] = currentcost
+        if x == endx and y == endy:
+            found_end=True
+            break
+        for dx, dy in moves:
+            newx = x + dx
+            newy = y + dy
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and (newx, newy) not in visited_cost and problem[newx][newy] != 'X':
+                new_node = Node(newx, newy)
+                new_node.parent = currentnode
+                new_node.height = int(problem[newx][newy])
+                if sys.argv[3] == "euclidean":
+                    new_node.path_cost = currentcost + cost(currentnode, new_node) + euclidean(currentnode.pos, new_node.pos)
+                elif sys.argv[3] == "manhattan":
+                    new_node.path_cost = currentcost + cost(currentnode, new_node) + manhattan(currentnode.pos, new_node.pos)
+                node_queue.put((new_node.path_cost, counter, new_node))
+                counter+=1
+            
+                
+        
+    if found_end:
+        problem[currentnode.x][currentnode.y] = '*'
+        currentnode = currentnode.parent
+        while currentnode:
+            problem[currentnode.x][currentnode.y] = '*'
+            currentnode = currentnode.parent
+        return problem
+    return -1
 
 
 algorithm = sys.argv[2]
