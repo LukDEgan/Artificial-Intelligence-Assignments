@@ -81,26 +81,26 @@ def ucs(problem):
     node_queue = PriorityQueue()
     start_node = Node(startx, starty)
     counter =0
-    start_node.height = int(problem[startx][starty])
-    node_queue.put((start_node.path_cost, counter, start_node))
+    start_node.height = int(problem[starty][startx])
+    node_queue.put((0, counter, start_node))
     counter += 1
-    visited_cost = {}
+    visited = [[False] * Rows for i in range (Columns)]
+    visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
         currentcost, _, currentnode = node_queue.get()
         x, y = currentnode.x, currentnode.y
-        if (x, y) not in visited_cost or currentcost < visited_cost[(x, y)]:
-            visited_cost[(x, y)] = currentcost
+        visited[y][x]=True
         if x == endx and y == endy:
             found_end=True
             break
-        for dx, dy in moves:
+        for dy, dx in moves:
             newx = x + dx
             newy = y + dy
-            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and (newx, newy) not in visited_cost and problem[newx][newy] != 'X':
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and problem[newy][newx] != 'X' and not visited[newy][newx]:
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
-                new_node.height = int(problem[newx][newy])
+                new_node.height = int(problem[newy][newx])
                 new_node.path_cost = currentcost + cost(currentnode, new_node)
                 node_queue.put((new_node.path_cost, counter, new_node))
                 counter+=1
@@ -108,10 +108,10 @@ def ucs(problem):
                 
         
     if found_end:
-        problem[currentnode.x][currentnode.y] = '*'
+        problem[currentnode.y][currentnode.x] = '*'
         currentnode = currentnode.parent
         while currentnode:
-            problem[currentnode.x][currentnode.y] = '*'
+            problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
         return problem
     return -1
@@ -121,46 +121,55 @@ def manhattan(current_pos, end_pos):
 
 
 def euclidean(current_pos, end_pos):
-    return ( ((abs(end_pos[0]-current_pos[0]))**2+ (abs(end_pos[1]-current_pos[1]))**2)**0.5)
+    a = abs(end_pos[0]-current_pos[0])
+    b = abs(end_pos[1]-current_pos[1])
+    c = ((a**2)+(b**2))**0.5
+    return c
 
 def astar(problem):
     node_queue = PriorityQueue()
     start_node = Node(startx, starty)
     counter =0
-    start_node.height = int(problem[startx][starty])
-    node_queue.put((start_node.path_cost, counter, start_node))
+    start_node.height = int(problem[starty][startx])
+    node_queue.put((0, counter, start_node))
     counter += 1
-    visited_cost = {}
+    visited = [[False] * Rows for i in range (Columns)]
+    visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
-        currentcost, _, currentnode = node_queue.get()
+        next = node_queue.get()
+        currentcost, _, currentnode = next
         x, y = currentnode.x, currentnode.y
-        if (x, y) not in visited_cost or currentcost < visited_cost[(x, y)]:
-            visited_cost[(x, y)] = currentcost
+        visited[y][x]= True
         if x == endx and y == endy:
             found_end=True
             break
-        for dx, dy in moves:
+        for dy, dx in moves:
             newx = x + dx
             newy = y + dy
-            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and (newx, newy) not in visited_cost and problem[newx][newy] != 'X':
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and problem[newy][newx] != 'X' and not visited[newx][newy]:
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
-                new_node.height = int(problem[newx][newy])
+                new_node.height = int(problem[newy][newx])
                 if sys.argv[3] == "euclidean":
-                    new_node.path_cost = currentcost + cost(currentnode, new_node) + euclidean(currentnode.pos, new_node.pos)
+                    new_cost = currentcost + cost(currentnode, new_node)
+                    heuristic_cost = euclidean((newx, newy), (endx, endy))  # Change to manhattan if desired
+                    total_cost = new_cost + heuristic_cost
+                    node_queue.put((total_cost, counter, new_node))
                 elif sys.argv[3] == "manhattan":
-                    new_node.path_cost = currentcost + cost(currentnode, new_node) + manhattan(currentnode.pos, new_node.pos)
-                node_queue.put((new_node.path_cost, counter, new_node))
+                    new_cost = currentcost + cost(currentnode, new_node)
+                    heuristic_cost = manhattan((newx, newy), (endx, endy))  # Change to manhattan if desired
+                    total_cost = new_cost + heuristic_cost
+                    node_queue.put((total_cost, counter, new_node))
                 counter+=1
             
                 
         
     if found_end:
-        problem[currentnode.x][currentnode.y] = '*'
+        problem[currentnode.y][currentnode.x] = '*'
         currentnode = currentnode.parent
         while currentnode:
-            problem[currentnode.x][currentnode.y] = '*'
+            problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
         return problem
     return -1
@@ -175,6 +184,11 @@ elif algorithm == "ucs":
     ucs_solve = ucs(map)
     for row in ucs_solve:
         print(" ".join(row))
+elif algorithm == "astar":
+    astar_solve = astar(map)
+    for row in astar_solve:
+        print(" ".join(row))
+
 
 
     
