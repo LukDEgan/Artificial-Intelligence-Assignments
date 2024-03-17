@@ -7,11 +7,11 @@ with open(sys.argv[1], "r") as file:
     Columns = int(firstline[1])
     
     secondline = file.readline().split()
-    startx = int(secondline[0])-1
-    starty = int(secondline[1])-1
+    starty = int(secondline[0])-1
+    startx = int(secondline[1])-1
     thirdline = file.readline().split()
-    endx = int(thirdline[0])-1
-    endy = int(thirdline[1])-1
+    endy = int(thirdline[0])-1
+    endx = int(thirdline[1])-1
 
     map = [list(map(str,file.readline().split())) for row in range(Rows)]
 
@@ -29,14 +29,14 @@ class Node:
         return (self.x, self.y)
 
 
-moves = [[-1,0], [1,0], [0,-1],[0,1]]
+moves = [[-1,0], [1,0], [0,-1], [0,1]]
 
 def bfs(problem):
     node_queue = deque()
     start_node = Node(startx, starty)
     node_queue.append(start_node)
     visited = [[False] * Rows for i in range (Columns)]
-    visited[start_node.x][start_node.y] = True
+    visited[start_node.y][start_node.x] = True
     deeper_nodes = 0
     atdepth_nodes =1
     found_end = False
@@ -46,14 +46,14 @@ def bfs(problem):
         if x == endx and y == endy:
             found_end=True
             break
-        for dx, dy in moves:
+        for dy, dx in moves:
             newx = x + dx
             newy = y + dy
             if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and not visited[newx][newy] and problem[newx][newy] != 'X':
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 node_queue.append(new_node)
-                visited[newx][newy]= True
+                visited[newy][newx]= True
                 deeper_nodes+=1
         atdepth_nodes-=1
         if atdepth_nodes == 0:
@@ -62,10 +62,10 @@ def bfs(problem):
             deeper_nodes =0
         
     if found_end:
-        problem[currentnode.x][currentnode.y] = '*'
+        problem[currentnode.y][currentnode.x] = '*'
         currentnode = currentnode.parent
         while currentnode:
-            problem[currentnode.x][currentnode.y] = '*'
+            problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
         return problem
     return -1
@@ -84,7 +84,7 @@ def ucs(problem):
     start_node.height = int(problem[starty][startx])
     node_queue.put((0, counter, start_node))
     counter += 1
-    visited = [[False] * Rows for i in range (Columns)]
+    visited = [[False] * Columns for i in range (Rows)]
     visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
@@ -133,7 +133,7 @@ def astar(problem):
     start_node.height = int(problem[starty][startx])
     node_queue.put((0, counter, start_node))
     counter += 1
-    visited = [[False] * Rows for i in range (Columns)]
+    visited = [[False] * Columns for i in range (Rows)]
     visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
@@ -147,18 +147,18 @@ def astar(problem):
         for dy, dx in moves:
             newx = x + dx
             newy = y + dy
-            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and problem[newy][newx] != 'X' and not visited[newx][newy]:
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and problem[newy][newx] != 'X' and not visited[newy][newx]:
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 new_node.height = int(problem[newy][newx])
                 if sys.argv[3] == "euclidean":
                     new_cost = currentcost + cost(currentnode, new_node)
-                    heuristic_cost = euclidean((newx, newy), (endx, endy))  # Change to manhattan if desired
+                    heuristic_cost = euclidean((newx, newy), (endx, endy)) 
                     total_cost = new_cost + heuristic_cost
                     node_queue.put((total_cost, counter, new_node))
                 elif sys.argv[3] == "manhattan":
                     new_cost = currentcost + cost(currentnode, new_node)
-                    heuristic_cost = manhattan((newx, newy), (endx, endy))  # Change to manhattan if desired
+                    heuristic_cost = manhattan((newx, newy), (endx, endy))
                     total_cost = new_cost + heuristic_cost
                     node_queue.put((total_cost, counter, new_node))
                 counter+=1
