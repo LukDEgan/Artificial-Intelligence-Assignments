@@ -35,7 +35,7 @@ def bfs(problem):
     node_queue = deque()
     start_node = Node(startx, starty)
     node_queue.append(start_node)
-    visited = [[False] * Rows for i in range (Columns)]
+    visited = [[False] * Columns for i in range (Rows)]
     visited[start_node.y][start_node.x] = True
     deeper_nodes = 0
     atdepth_nodes =1
@@ -49,7 +49,7 @@ def bfs(problem):
         for dy, dx in moves:
             newx = x + dx
             newy = y + dy
-            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and not visited[newx][newy] and problem[newx][newy] != 'X':
+            if newx >= 0 and newx < Columns and newy >= 0 and newy < Rows and not visited[newy][newx] and problem[newy][newx] != 'X':
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 node_queue.append(new_node)
