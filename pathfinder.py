@@ -67,12 +67,17 @@ def bfs(problem):
         while currentnode:
             problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
+        for row in problem:
+            print(' '.join(row))
         return problem
-    return -1
+    else:
+        print("null")
+        return -1
 
 def cost(Node1, Node2):
-    if Node1.height - Node2.height > 0:
-        return 1 + Node1.height - Node2.height
+    diff = Node2.height - Node1.height
+    if diff > 0:
+        return (1 + diff)
     else:
         return 1
 
@@ -113,11 +118,17 @@ def ucs(problem):
         while currentnode:
             problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
+        for row in problem:
+            print(" ".join(row))
         return problem
-    return -1
+    else:
+        print("null")
+        return -1
 
 def manhattan(current_pos, end_pos):
-    return ((abs(end_pos[0]-current_pos[0]))+ (abs(end_pos[1]-current_pos[1])))
+    x_dist = abs(end_pos[0]-current_pos[0])
+    y_dist = abs(end_pos[1]-current_pos[1])
+    return (x_dist + y_dist)
 
 
 def euclidean(current_pos, end_pos):
@@ -137,8 +148,7 @@ def astar(problem):
     visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
-        next = node_queue.get()
-        currentcost, _, currentnode = next
+        currentcost, _, currentnode = node_queue.get()
         x, y = currentnode.x, currentnode.y
         visited[y][x]= True
         if x == endx and y == endy:
@@ -154,15 +164,12 @@ def astar(problem):
                 if sys.argv[3] == "euclidean":
                     new_cost = currentcost + cost(currentnode, new_node)
                     heuristic_cost = euclidean((newx, newy), (endx, endy)) 
-                    total_cost = new_cost + heuristic_cost
-                    node_queue.put((total_cost, counter, new_node))
                 elif sys.argv[3] == "manhattan":
                     new_cost = currentcost + cost(currentnode, new_node)
                     heuristic_cost = manhattan((newx, newy), (endx, endy))
-                    total_cost = new_cost + heuristic_cost
-                    node_queue.put((total_cost, counter, new_node))
+                total_cost = new_cost + heuristic_cost
+                node_queue.put((total_cost, counter, new_node))
                 counter+=1
-            
                 
         
     if found_end:
@@ -171,24 +178,21 @@ def astar(problem):
         while currentnode:
             problem[currentnode.y][currentnode.x] = '*'
             currentnode = currentnode.parent
+        for row in problem:
+            print(" ".join(row))
         return problem
-    return -1
+    else:
+        print("null")
+        return -1
 
 
 algorithm = sys.argv[2]
 if(algorithm == "bfs"):
-    bfs_solve = bfs(map)
-    for row in bfs_solve:
-        print(' '.join(row))
+    bfs(map)
 elif algorithm == "ucs":
-    ucs_solve = ucs(map)
-    for row in ucs_solve:
-        print(" ".join(row))
+    ucs(map)
 elif algorithm == "astar":
-    astar_solve = astar(map)
-    for row in astar_solve:
-        print(" ".join(row))
-
+    astar(map)
 
 
     
