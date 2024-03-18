@@ -22,14 +22,19 @@ class Node:
          self.parent = None
          self.height = 0
          self.rock = False
-         self.path_cost=0
-    def __lt__(self, other):
-        return self.path_cost < other.path_cost
     def pos(self):
         return (self.x, self.y)
 
 
 moves = [[-1,0], [1,0], [0,-1], [0,1]]
+def print_problem(problem, currentnode):
+    problem[currentnode.y][currentnode.x] = '*'
+    currentnode = currentnode.parent
+    while currentnode:
+        problem[currentnode.y][currentnode.x] = '*'
+        currentnode = currentnode.parent
+    for row in problem:
+        print(' '.join(row))
 
 def bfs(problem):
     node_queue = deque()
@@ -62,14 +67,7 @@ def bfs(problem):
             deeper_nodes =0
         
     if found_end:
-        problem[currentnode.y][currentnode.x] = '*'
-        currentnode = currentnode.parent
-        while currentnode:
-            problem[currentnode.y][currentnode.x] = '*'
-            currentnode = currentnode.parent
-        for row in problem:
-            print(' '.join(row))
-        return problem
+        print_problem(problem, currentnode)
     else:
         print("null")
         return -1
@@ -106,21 +104,14 @@ def ucs(problem):
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 new_node.height = int(problem[newy][newx])
-                new_node.path_cost = currentcost + cost(currentnode, new_node)
-                node_queue.put((new_node.path_cost, counter, new_node))
+                new_cost = currentcost + cost(currentnode, new_node)
+                node_queue.put((new_cost, counter, new_node))
                 counter+=1
             
                 
         
     if found_end:
-        problem[currentnode.y][currentnode.x] = '*'
-        currentnode = currentnode.parent
-        while currentnode:
-            problem[currentnode.y][currentnode.x] = '*'
-            currentnode = currentnode.parent
-        for row in problem:
-            print(" ".join(row))
-        return problem
+        print_problem(problem, currentnode)
     else:
         print("null")
         return -1
@@ -142,13 +133,17 @@ def astar(problem):
     start_node = Node(startx, starty)
     counter =0
     start_node.height = int(problem[starty][startx])
-    node_queue.put((0, counter, start_node))
+    if sys.argv[3] == "euclidean":
+        heuristic_cost = euclidean((startx, starty), (endx, endy)) 
+    elif sys.argv[3] == "manhattan":
+        heuristic_cost = manhattan((startx, starty), (endx, endy))
+    node_queue.put((0, heuristic_cost, counter, start_node))
     counter += 1
     visited = [[False] * Columns for i in range (Rows)]
     visited[start_node.y][start_node.x] = True
     found_end = False
     while not node_queue.empty():
-        currentcost, _, currentnode = node_queue.get()
+        currentcost, _,  _, currentnode = node_queue.get()
         x, y = currentnode.x, currentnode.y
         visited[y][x]= True
         if x == endx and y == endy:
@@ -161,26 +156,16 @@ def astar(problem):
                 new_node = Node(newx, newy)
                 new_node.parent = currentnode
                 new_node.height = int(problem[newy][newx])
+                g = currentcost + cost(currentnode, new_node)
                 if sys.argv[3] == "euclidean":
-                    new_cost = currentcost + cost(currentnode, new_node)
-                    heuristic_cost = euclidean((newx, newy), (endx, endy)) 
+                    h = euclidean((newx, newy), (endx, endy)) 
                 elif sys.argv[3] == "manhattan":
-                    new_cost = currentcost + cost(currentnode, new_node)
-                    heuristic_cost = manhattan((newx, newy), (endx, endy))
-                total_cost = new_cost + heuristic_cost
-                node_queue.put((total_cost, counter, new_node))
+                    h = manhattan((newx, newy), (endx, endy))
+                f = g + h
+                node_queue.put((g, f, counter, new_node))
                 counter+=1
-                
-        
     if found_end:
-        problem[currentnode.y][currentnode.x] = '*'
-        currentnode = currentnode.parent
-        while currentnode:
-            problem[currentnode.y][currentnode.x] = '*'
-            currentnode = currentnode.parent
-        for row in problem:
-            print(" ".join(row))
-        return problem
+        print_problem(problem, currentnode)
     else:
         print("null")
         return -1
