@@ -69,7 +69,7 @@ def read_points(filename):
             point = tuple(map(float, data[:-1]))
             points.append(point)
     return points
-def read_tests(filename):
+def read_data(filename):
     points = []
     with open(filename, 'r') as file:
         next(file)
@@ -88,8 +88,8 @@ def label_test_samples(test_samples, trained_tree, training_data, points):
     return labeled_samples
 
 points = read_points(sys.argv[1])
-training_data = read_tests(sys.argv[1])
-samples = read_tests(sys.argv[2])
+training_data = read_data(sys.argv[1])
+samples = read_data(sys.argv[2])
 D = int(sys.argv[3])
 tree = kdTree(points, D)
 labeled_test_samples = label_test_samples(samples, tree, training_data, points)
