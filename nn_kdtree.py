@@ -87,9 +87,9 @@ def label_test_samples(test_samples, trained_tree, training_data, points):
         labeled_samples.append(sample + (quality,))
     return labeled_samples
 
-points = read_points('train')
-training_data = read_tests('train')
-samples = read_tests('test-sample')
+points = read_points('[train]')
+training_data = read_tests('[train]')
+samples = read_tests('[test-sample]')
 D = int(sys.argv[3])
 tree = kdTree(points, D)
 labeled_test_samples = label_test_samples(samples, tree, training_data, points)
