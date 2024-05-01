@@ -13,8 +13,9 @@ def closer_distance(pivot, p1, p2):
             return p1
         else:
             return p2
+        
 def distance(point1, point2):
-    squared_distance = sum((y-x)**2 for y, x in zip(point2, point1))**0.5
+    squared_distance = sum((x1-x2)**2 for x1, x2 in zip(point1, point2))
     return squared_distance
 
 class kdTree:
@@ -45,18 +46,10 @@ def OneNN(root, point, Depth = 0):
         else:
             next_branch = root.right
             skipped_branch = root.left
-        best = closer_distance(point,
-                           OneNN(next_branch,
-                                                point,
-                                                Depth + 1),
-                           root.point)
+        best = closer_distance(point, OneNN(next_branch, point, Depth + 1), root.point)
 
-        if distance(point, best) > (point[axis] - root.point[axis])**2:
-            best = closer_distance(point,
-                               OneNN(skipped_branch,
-                                                    point,
-                                                    Depth + 1),
-                               best)
+        if distance(point, best) > (point[axis] - root.point[axis])**2: 
+            best = closer_distance(point, OneNN(skipped_branch, point, Depth + 1), best)
 
         return best
 
