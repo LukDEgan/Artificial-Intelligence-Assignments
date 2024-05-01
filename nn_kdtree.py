@@ -19,25 +19,24 @@ def distance(point1, point2):
     return squared_distance
 
 class kdTree:
-    def __init__(self, Points, Dim = 0):   
+    def __init__(self, Points, Dim):   
         n = len(Points)
         if n <= 0:
             return None   
-       
-        axis = (Dim+1) % 12
+        axis = (Dim) % 11
         Points.sort(key = lambda x: x[axis])
         m = n // 2
         self.point = Points[m]
         self.left = self.right = None
         if m > 0:
-            self.left = kdTree(Points[:m], Dim)
+            self.left = kdTree(Points[:m], Dim+1)
         if n-(m+1) > 0:
-            self.right = kdTree(Points[m+1:], Dim)
+            self.right = kdTree(Points[m+1:], Dim+1)
 
-def OneNN(root, point, Depth = 0):
+def OneNN(root, point, Depth):
         if root is None:
             return None
-        axis = Depth % 12
+        axis = (Depth) % 11
         next_branch = None
         skipped_branch = None
         if point[axis] < root.point[axis]:
@@ -74,7 +73,7 @@ def read_data(filename):
 def label_test_samples(test_samples, trained_tree, training_data, points):
     labeled_samples = []
     for sample in test_samples:
-        nearest_neighbor = OneNN(trained_tree, sample)
+        nearest_neighbor = OneNN(trained_tree, sample, 0)
         nearest_neighbor_index = points.index(nearest_neighbor)
         quality = training_data[nearest_neighbor_index][-1]
         labeled_samples.append(sample + (quality,))
