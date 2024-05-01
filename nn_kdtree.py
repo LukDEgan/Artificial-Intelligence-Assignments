@@ -83,7 +83,6 @@ def label_test_samples(test_samples, trained_tree, training_data, points):
     for sample in test_samples:
         nearest_neighbor = OneNN(trained_tree, sample)
         nearest_neighbor_index = points.index(nearest_neighbor)
-        print(training_data[nearest_neighbor_index])
         quality = training_data[nearest_neighbor_index][-1]
         labeled_samples.append(sample + (quality,))
     return labeled_samples
@@ -96,4 +95,4 @@ tree = kdTree(points, D)
 labeled_test_samples = label_test_samples(samples, tree, training_data, points)
 
 for i, sample in enumerate(labeled_test_samples):
-    print(f"Sample {i+1}: {sample}")
+    print(int(sample[-1]))
