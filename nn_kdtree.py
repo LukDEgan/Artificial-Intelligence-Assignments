@@ -63,7 +63,7 @@ def BuildKdTree(Points, Depth):
 def OneNN(root, point, Depth):
         if root is None:
             return None
-        axis = (Depth) % 11
+        axis = Depth % 11
         next_branch = None
         skipped_branch = None
         if point[axis] < root.point[axis]:
@@ -84,7 +84,7 @@ tree = BuildKdTree(training_data, Depth)
 for sample in test_samples:
     nearest_neighbor = OneNN(tree, sample, 0)
     nearest_neighbor_index = training_data.index(nearest_neighbor)
-    print(nearest_neighbor)
-    print(nearest_neighbor_index)
-    print(points[nearest_neighbor_index])
-    print("\n")
+    #print(nearest_neighbor)
+    #print(nearest_neighbor_index)
+    print(int(points[nearest_neighbor_index][-1]))
+    #print("\n")
