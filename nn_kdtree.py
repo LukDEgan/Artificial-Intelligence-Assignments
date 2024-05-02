@@ -11,7 +11,7 @@ def read_data(filename):
     return points
 
 
-Depth = int(sys.argv[3])
+dimensions = int(sys.argv[3])
 points = read_data(sys.argv[1])
 training_data = [i[:-1] for i in points]
 labels = [i[-1] for i in points]
@@ -63,7 +63,7 @@ def BuildKdTree(Points, Depth):
 def OneNN(root, point, Depth):
         if root is None:
             return None
-        axis = Depth % 11
+        axis = Depth % dimensions
         next_branch = None
         skipped_branch = None
         if point[axis] < root.point[axis]:
@@ -80,7 +80,7 @@ def OneNN(root, point, Depth):
         return best
 
 
-tree = BuildKdTree(training_data, Depth)
+tree = BuildKdTree(training_data, 0)
 for sample in test_samples:
     nearest_neighbor = OneNN(tree, sample, 0)
     nearest_neighbor_index = training_data.index(nearest_neighbor)
