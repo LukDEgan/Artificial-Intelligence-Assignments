@@ -62,37 +62,30 @@ def BuildKdTree(Points, labels, Depth):
         return node
 
 def OneNN(root, point, Depth):
-    if root is None:
-        return (float('inf'), None)
-    dim = len(point)
-    axis = Depth % dim
-    next_branch = None
-    skipped_branch = None
-    current_dist = squared_distance(point, root.point)
-    if point[axis] < root.point[axis]:
-        next_branch = root.left
-        skipped_branch = root.right
-    else:
-        next_branch = root.right
-        skipped_branch = root.left
-    
-    best, label = OneNN(next_branch, point, Depth + 1)
-    if current_dist< best:
-        best = current_dist
-        label = root.label
+        if root is None:
+            return None
+        axis = (Depth) % 11
+        next_branch = None
+        skipped_branch = None
+        if point[axis] < root.point[axis]:
+            next_branch = root.left
+            skipped_branch = root.right
+        else:
+            next_branch = root.right
+            skipped_branch = root.left
+        best = closer_distance(point, OneNN(next_branch, point, Depth + 1), root.point)
 
-    if ((point[axis] - root.point[axis])**2) < best: 
-        skipped_best, skipped_label = OneNN(skipped_branch, point, Depth + 1)
-        if skipped_best < best:
-            best = skipped_best
-            label = skipped_label
+        if squared_distance(point, best) > (point[axis] - root.point[axis])**2: 
+            best = closer_distance(point, OneNN(skipped_branch, point, Depth + 1), best)
 
-    return (best, label)
+        return best
+
+
 
 
 
 
 tree = BuildKdTree(training_data, labels, Depth)
-
 for sample in test_samples:
-    print(int(OneNN(tree, sample, 0)[1]))   
+    nearest_neighbor = OneNN(tree, sample, 0)
+    print(int(nearest_neighbor[-1]))
