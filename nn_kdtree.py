@@ -38,27 +38,26 @@ def squared_distance(point1, point2):
 
 
 class Node:
-    def __init__(self, point=None, label=None,):
+    def __init__(self, point=None):
         self.point = point
-        self.label = label
         self.left = None
         self.right = None
 
-def BuildKdTree(Points, labels, Depth):
+def BuildKdTree(Points, Depth):
     if not Points:
         return None
     elif len(Points) == 1:
-        node = Node(Points[0], Depth)
+        node = Node(Points[0])
         return node
     else:
         dim = len(Points[0])
         axis = Depth % dim
 
-        sorted_points = sorted(zip(points, labels), key=lambda x: x[0][axis])
+        sorted_points = sorted(Points, key=lambda point: point[axis])
         m = len(Points)//2
-        node = Node(sorted_points[m][0], sorted_points[m][1])
-        node.left = BuildKdTree([x[0] for x in sorted_points[:m]], [x[1] for x in sorted_points[:m]], Depth + 1)
-        node.right = BuildKdTree([x[0] for x in sorted_points[m+1:]], [x[1] for x in sorted_points[m+1:]], Depth + 1)
+        node = Node(sorted_points[m])
+        node.left = BuildKdTree(sorted_points[:m], Depth + 1)
+        node.right = BuildKdTree(sorted_points[m+1:], Depth + 1)
         return node
 
 def OneNN(root, point, Depth):
@@ -81,11 +80,11 @@ def OneNN(root, point, Depth):
         return best
 
 
-
-
-
-
-tree = BuildKdTree(training_data, labels, Depth)
+tree = BuildKdTree(training_data, Depth)
 for sample in test_samples:
     nearest_neighbor = OneNN(tree, sample, 0)
-    print(int(nearest_neighbor[-1]))
+    nearest_neighbor_index = training_data.index(nearest_neighbor)
+    print(nearest_neighbor)
+    print(nearest_neighbor_index)
+    print(points[nearest_neighbor_index])
+    print("\n")
