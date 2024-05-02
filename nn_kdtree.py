@@ -1,66 +1,5 @@
 import sys
-def closer_distance(pivot, p1, p2):
-        if p1 is None:
-            return p2
 
-        if p2 is None:
-            return p1
-
-        d1 = distance(pivot, p1)
-        d2 = distance(pivot, p2)
-
-        if d1 < d2:
-            return p1
-        else:
-            return p2
-        
-def distance(point1, point2):
-    squared_distance = sum((x1-x2)**2 for x1, x2 in zip(point1, point2))
-    return squared_distance
-
-class kdTree:
-    def __init__(self, Points, Dim):   
-        n = len(Points)
-        if n <= 0:
-            return None   
-        axis = (Dim) % 11
-        Points.sort(key = lambda x: x[axis])
-        m = n // 2
-        self.point = Points[m]
-        self.left = self.right = None
-        if m > 0:
-            self.left = kdTree(Points[:m], Dim+1)
-        if n-(m+1) > 0:
-            self.right = kdTree(Points[m+1:], Dim+1)
-
-def OneNN(root, point, Depth):
-        if root is None:
-            return None
-        axis = (Depth) % 11
-        next_branch = None
-        skipped_branch = None
-        if point[axis] < root.point[axis]:
-            next_branch = root.left
-            skipped_branch = root.right
-        else:
-            next_branch = root.right
-            skipped_branch = root.left
-        best = closer_distance(point, OneNN(next_branch, point, Depth + 1), root.point)
-
-        if distance(point, best) > (point[axis] - root.point[axis])**2: 
-            best = closer_distance(point, OneNN(skipped_branch, point, Depth + 1), best)
-
-        return best
-
-def read_points(filename):
-    points = []
-    with open(filename, 'r') as file:
-        next(file)
-        for line in file:
-            data = line.strip().split()
-            point = tuple(map(float, data[:-1]))
-            points.append(point)
-    return points
 def read_data(filename):
     points = []
     with open(filename, 'r') as file:
@@ -70,21 +9,90 @@ def read_data(filename):
             point = tuple(map(float, data))
             points.append(point)
     return points
-def label_test_samples(test_samples, trained_tree, training_data, points):
-    labeled_samples = []
-    for sample in test_samples:
-        nearest_neighbor = OneNN(trained_tree, sample, 0)
-        nearest_neighbor_index = points.index(nearest_neighbor)
-        quality = training_data[nearest_neighbor_index][-1]
-        labeled_samples.append(sample + (quality,))
-    return labeled_samples
 
-points = read_points(sys.argv[1])
-training_data = read_data(sys.argv[1])
-samples = read_data(sys.argv[2])
-D = int(sys.argv[3])
-tree = kdTree(points, D)
-labeled_test_samples = label_test_samples(samples, tree, training_data, points)
 
-for i, sample in enumerate(labeled_test_samples):
-    print(int(sample[-1]))
+Depth = int(sys.argv[3])
+points = read_data(sys.argv[1])
+training_data = [i[:-1] for i in points]
+labels = [i[-1] for i in points]
+test_samples = read_data(sys.argv[2])
+
+def closer_distance(pivot, p1, p2):
+        if p1 is None:
+            return p2
+
+        if p2 is None:
+            return p1
+
+        d1 = squared_distance(pivot, p1)
+        d2 = squared_distance(pivot, p2)
+
+        if d1 < d2:
+            return p1
+        else:
+            return p2
+        
+def squared_distance(point1, point2):
+    squared_distance = sum((x1-x2)**2 for x1, x2 in zip(point1, point2))
+    return squared_distance
+
+
+class Node:
+    def __init__(self, point=None, label=None,):
+        self.point = point
+        self.label = label
+        self.left = None
+        self.right = None
+
+def BuildKdTree(Points, labels, Depth):
+    if not Points:
+        return None
+    elif len(Points) == 1:
+        node = Node(Points[0], Depth)
+        return node
+    else:
+        dim = len(Points[0])
+        axis = Depth % dim
+
+        sorted_points = sorted(zip(points, labels), key=lambda x: x[0][axis])
+        m = len(Points)//2
+        node = Node(sorted_points[m][0], sorted_points[m][1])
+        node.left = BuildKdTree([x[0] for x in sorted_points[:m]], [x[1] for x in sorted_points[:m]], Depth + 1)
+        node.right = BuildKdTree([x[0] for x in sorted_points[m+1:]], [x[1] for x in sorted_points[m+1:]], Depth + 1)
+        return node
+
+def OneNN(root, point, Depth):
+    if root is None:
+        return (float('inf'), None)
+    dim = len(point)
+    axis = Depth % dim
+    next_branch = None
+    skipped_branch = None
+    current_dist = squared_distance(point, root.point)
+    if point[axis] < root.point[axis]:
+        next_branch = root.left
+        skipped_branch = root.right
+    else:
+        next_branch = root.right
+        skipped_branch = root.left
+    
+    best, label = OneNN(next_branch, point, Depth + 1)
+    if current_dist< best:
+        best = current_dist
+        label = root.label
+
+    if ((point[axis] - root.point[axis])**2) < best: 
+        skipped_best, skipped_label = OneNN(skipped_branch, point, Depth + 1)
+        if skipped_best < best:
+            best = skipped_best
+            label = skipped_label
+
+    return (best, label)
+
+
+
+
+tree = BuildKdTree(training_data, labels, Depth)
+
+for sample in test_samples:
+    print(int(OneNN(tree, sample, 0)[1]))   
