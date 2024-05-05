@@ -42,7 +42,6 @@ class Node:
         self.point = point
         self.left = None
         self.right = None
-
 def BuildKdTree(Points, Depth):
     if not Points:
         return None
@@ -52,7 +51,6 @@ def BuildKdTree(Points, Depth):
     else:
         dim = len(Points[0])
         axis = Depth % dim
-
         sorted_points = sorted(Points, key=lambda point: point[axis])
         m = len(Points)//2
         node = Node(sorted_points[m])
