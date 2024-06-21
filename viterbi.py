@@ -97,7 +97,6 @@ def build_emission_matrix(traversable_points, map_data, observations, error_rate
 
     for idx, pos in enumerate(traversable_points):
         true_reading = get_obstacle_reading(pos, map_data)
-        print(get_obstacle_reading(pos, map_data))
         for obs_idx, observed_reading in enumerate(observations):
             diff = sum(tr != or_ for tr, or_ in zip(true_reading, observed_reading))
             prob = (1 - error_rate) ** (4 - diff) * error_rate ** diff
@@ -111,7 +110,6 @@ def viterbi(traversable_points, Tm, Em, observations):
     T = len(observations)
     trellis = np.zeros([K, T])
 
-    # Initialization
     initial_prob = 1.0 / K
     for i in range(K):
         trellis[i, 0] = initial_prob * Em[i, 0]
@@ -142,32 +140,6 @@ def save_output(trellis, traversable_points, map_size):
 
 
 
-def print_transition_model(transition_model, traversable_points):
-    print("Transition Model:")
-    print("       ", end="")
-    for pos in traversable_points:
-        print(f"{pos}   ", end="")
-    print()
-    for i, pos in enumerate(traversable_points):
-        print(f"{pos} ", end="")
-        for j, adj_pos in enumerate(traversable_points):
-            print(f" {transition_model[i, j]:.2f}", end="  ")
-        print()
-
-
-def print_emission_model(emission_model, traversable_points, observations):
-    print("Emission Model:")
-    print("Observations:", observations)
-    print("    ", end="")
-    for obs in observations:
-        print(f"{obs}   ", end="")
-    print()
-    for i, pos in enumerate(traversable_points):
-        print(f"{pos} ", end="")
-        for j in range(len(observations)):
-            print(f" {emission_model[i, j]:.2f}", end="  ")
-        print()
-
 def main(file_path):
     map_size, map_data, num_observations, observations, sensor_error_rate = read_input(file_path)
     traversable_points = get_traversable_positions(map_data)
@@ -175,8 +147,6 @@ def main(file_path):
     Em = build_emission_matrix(traversable_points, map_data, observations, sensor_error_rate)
     trellis = viterbi(traversable_points, Tm, Em, observations)
     save_output(trellis, traversable_points, map_size)
-    print_transition_model(Tm, traversable_points)
-    print_emission_model(Em, traversable_points, observations)
 
 input_file_path = sys.argv[1]
 main(input_file_path)
